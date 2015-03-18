@@ -81,7 +81,7 @@ class GameEngine(object):
 		print('Do you want to play again? (yes or no)')
 		return raw_input('> ').lower().startswith('y')
 	
-	def play(self, secretWord):
+	def oneguess(self, secretWord):
 		
 		time.sleep(0.5)
 		self.hangmanpics = self.gameboard.choosedifficulty(self.gameboard.difficulty)
@@ -107,6 +107,26 @@ class GameEngine(object):
 		
 		
 				
+class game(object):
+	def __init__(self, game):
+		self.game = game
+	
+	def play(self):
+		secretWord = mygame.getRandomWord(words)
+		while True:
+			mygame.oneguess(secretWord)
+			if mygame.gameisdone:
+				if mygame.playagain():
+					myboard = gameboard(raw_input('Select Diffculty > '), words)
+					mygame = GameEngine(myboard)
+					secretWord = mygame.getRandomWord(words)
+					mygame.missedLetters = ''
+					mygame.correctLetters = ''
+					mygame.gameisdone = False
+				else:
+					quit()
+	
+				
 if __name__ == '__main__':
 	print('\n'*10)
 	for letter in hangman:
@@ -116,16 +136,5 @@ if __name__ == '__main__':
 	words = importwordlist('wordlist.txt')
 	myboard = gameboard(raw_input('Select Diffculty, easy or hard > ').lower(), words)
 	mygame = GameEngine(myboard)
-	secretWord = mygame.getRandomWord(words)
-	while True:
-		mygame.play(secretWord)
-		if mygame.gameisdone:
-			if mygame.playagain():
-				myboard = gameboard(raw_input('Select Diffculty > '), words)
-				mygame = GameEngine(myboard)
-				secretWord = mygame.getRandomWord(words)
-				mygame.missedLetters = ''
-				mygame.correctLetters = ''
-				mygame.gameisdone = False
-			else:
-				quit()
+	play = game(mygame)
+	play.play()
