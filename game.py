@@ -3,14 +3,15 @@ import random
 import os
 import boards
 import time
+from sys import argv
 
-#import wordlist
 
 hangman = ['H', 'A', 'N', 'G', 'M', 'A', 'N']
 
 def importwordlist(file):
 	with open(file, 'r') as f:
-		words = filter(None, f.read().split('\n'))
+		words = list(filter(None, f.read().split('\n')))
+#		print(words)
 		return words
 
 class gameboard(object):
@@ -67,7 +68,7 @@ class GameEngine(object):
 	def getGuess(self, alreadyGuessed):
 		while True:
 			print('Guess a letter...')
-			guess = raw_input('> ').lower()
+			guess = input('> ').lower()
 			if len(guess) != 1:
 				print("Please enter just a single letter")
 			elif guess in alreadyGuessed:
@@ -79,9 +80,9 @@ class GameEngine(object):
 	
 	def playagain(self):
 		print('Do you want to play again? (yes or no)')
-		return raw_input('> ').lower().startswith('y')
+		return input('> ').lower().startswith('y')
 	
-	def play(self, secretWord):
+	def oneguess(self, secretWord):
 		
 		time.sleep(0.5)
 		self.hangmanpics = self.gameboard.choosedifficulty(self.gameboard.difficulty)
@@ -107,25 +108,37 @@ class GameEngine(object):
 		
 		
 				
+class game(object):
+	def __init__(self, mygame):
+		self.mygame = mygame
+	
+	def play(self):
+		secretWord = self.mygame.getRandomWord(words)
+		while True:
+			self.mygame.oneguess(secretWord)
+			if self.mygame.gameisdone:
+				if self.mygame.playagain():
+					secretWord = self.mygame.getRandomWord(words)
+					self.mygame.missedLetters = ''
+					self.mygame.correctLetters = ''
+					self.mygame.gameisdone = False
+				else:
+					quit()
+	
+				
 if __name__ == '__main__':
+	try:
+		script, difficulty = argv
+	except(ValueError):
+		print("Please select your difficulty, easy or hard:")
+		difficulty = input("> ")
 	print('\n'*10)
 	for letter in hangman:
 		print(letter, end=' ')
 		time.sleep(0.3)
 	print()
 	words = importwordlist('wordlist.txt')
-	myboard = gameboard(raw_input('Select Diffculty, easy or hard > ').lower(), words)
+	myboard = gameboard(difficulty.lower(), words)
 	mygame = GameEngine(myboard)
-	secretWord = mygame.getRandomWord(words)
-	while True:
-		mygame.play(secretWord)
-		if mygame.gameisdone:
-			if mygame.playagain():
-				myboard = gameboard(raw_input('Select Diffculty > '), words)
-				mygame = GameEngine(myboard)
-				secretWord = mygame.getRandomWord(words)
-				mygame.missedLetters = ''
-				mygame.correctLetters = ''
-				mygame.gameisdone = False
-			else:
-				quit()
+	play = game(mygame)
+	play.play()
